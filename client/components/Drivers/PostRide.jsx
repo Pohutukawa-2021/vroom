@@ -1,7 +1,6 @@
 import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { useFormik } from 'formik'
-import { connect } from 'react-redux'
 import * as Yup from 'yup'
 import { TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
@@ -13,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { addRides } from '../../apis/drivers'
 
 const rideSchema = Yup.object().shape({
-  startLocation: Yup.string()
+  leavingFrom: Yup.string()
     .required('Required'),
   destination: Yup.string()
     .required('Required'),
@@ -25,25 +24,29 @@ const rideSchema = Yup.object().shape({
     .required('Required'),
   date: Yup.string()
     .required('Required'),
-  seatsAvailable: Yup.string()
+  seats: Yup.string()
     .required('Required')
 })
 
-function Ride ({ user }) {
+export default function Ride () {
   const history = useHistory()
 
   const formik = useFormik({
     initialValues: {
-      startLocation: '',
+      leavingFrom: '',
       destination: '',
-      date: '',
       leavingTime: '',
       arrivalTime: '',
-      seatsAvailable: '',
-      cost: ''
+      cost: '',
+      date: '',
+      seats: '',
+      petsAllowed: '',
+      masksMandatory: ''
     },
     onSubmit: values => {
-      addRides(values, user) && ridePosted() && history.push('/')
+      console.log(values)
+      const newRide = { values }
+      addRides(newRide) && ridePosted() && history.push('/')
     },
     validationSchema: rideSchema
   })
@@ -57,7 +60,7 @@ function Ride ({ user }) {
       ? formik.errors[inputName]
       : false
   }
-  const seatsAvailable = [
+  const seats = [
     {
       value: '1',
       label: '1'
@@ -95,13 +98,13 @@ function Ride ({ user }) {
                   <TextField
                     sx={{ margin: '8px' }}
                     className = 'InputField'
-                    id="startLocation"
-                    name="startLocation"
+                    id="leavingFrom"
+                    name="leavingFrom"
                     placeholder="Leaving from.."
-                    label={showAnyErrors('startLocation') ? showAnyErrors('startLocation') : 'Leaving from..'}
-                    value={formik.values.startLocation}
+                    label={showAnyErrors('leavingFrom') ? showAnyErrors('leavingFrom') : 'Leaving from..'}
+                    value={formik.values.leavingFrom}
                     onChange={formik.handleChange}
-                    error={formik.touched.startLocation && Boolean(formik.errors.startLocation)}
+                    error={formik.touched.leavingFrom && Boolean(formik.errors.leavingFrom)}
                   />
                 </div>
                 <div className="column">
@@ -125,10 +128,10 @@ function Ride ({ user }) {
                     className = 'InputField'
                     id='leavingTime'
                     name='leavingTime'
-                    type='time'
+                    type='leavingTime'
                     placeholder='Leaving time'
                     onChange={formik.handleChange}
-                    label={showAnyErrors('leavingTime') ? showAnyErrors('leavingTime') : ''}
+                    label={showAnyErrors('leavingTime') ? showAnyErrors('leavingTime') : 'Leaving time'}
                     value={formik.values.leavingTime}
                     error={formik.touched.leavingTime && Boolean(formik.errors.leavingTime)}
                   />
@@ -139,9 +142,8 @@ function Ride ({ user }) {
                     className = 'InputField'
                     id="arrivalTime"
                     name="arrivalTime"
-                    type='time'
                     placeholder="Arrival time"
-                    label={showAnyErrors('arrivalTime') ? showAnyErrors('arrivalTime') : ''}
+                    label={showAnyErrors('arrivalTime') ? showAnyErrors('arrivalTime') : 'Arrival time'}
                     value={formik.values.arrivalTime}
                     onChange={formik.handleChange}
                     error={formik.touched.arrivalTime && Boolean(formik.errors.arrivalTime)}
@@ -179,16 +181,16 @@ function Ride ({ user }) {
                 <div className="column ">
                   <TextField
                     sx={{ margin: '8px', width: '240px' }}
-                    id="seatsAvailable"
+                    id="seats"
                     className = 'InputField seatsField'
-                    name="seatsAvailable"
+                    name="seats"
                     select
-                    label={showAnyErrors('seatsAvailable') ? showAnyErrors('seatsAvailable') : 'Passengers'}
-                    value={formik.values.seatsAvailable}
+                    label={showAnyErrors('seats') ? showAnyErrors('seats') : 'Seats'}
+                    value={formik.values.seats}
                     onChange={formik.handleChange}
-                    error={formik.touched.seatsAvailable && Boolean(formik.errors.seatsAvailable)}
+                    error={formik.touched.seats && Boolean(formik.errors.seats)}
                   >
-                    {seatsAvailable.map((option) => (
+                    {seats.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
                       </MenuItem>
@@ -222,11 +224,3 @@ function Ride ({ user }) {
     </>
   )
 }
-
-function mapStateToProps (state) {
-  return {
-    user: state.user
-  }
-}
-
-export default connect(mapStateToProps)(Ride)
